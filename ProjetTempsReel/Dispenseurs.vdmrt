@@ -1,0 +1,51 @@
+
+class Dispenseurs
+
+types
+public typesMissile = <A> | <B> | <C>;
+
+instance variables
+
+fini : bool := false;
+Valeur : int;
+Dispenseur : seq of char := "";
+
+operations
+
+public Dispenseurs: int ==> Dispenseurs
+Dispenseurs (valeur) ==
+ (Valeur := valeur;);
+
+public ActiverDispenseur: seq of char ==> ()
+ActiverDispenseur(d) ==
+ Dispenseur := d;
+
+public ReadDispenseur: () ==> seq of char
+ReadDispenseur() ==
+ return Dispenseur;
+
+-- fonction qui permet d'activer le dispenseur 
+public GetTypeMissile: () ==> typesMissile
+	GetTypeMissile() ==
+		(if (Valeur = 1) then ( return <A>)
+		else if (Valeur = 2) then (return <B>)
+		else return <C>;		
+	);	
+
+public Action: () ==> ()
+Action () ==
+  Valeur := Application`env.ReadPriority() ;
+
+public estFini: () ==> ()
+estFini() ==
+  skip;
+
+sync
+  --mutex(Action);	-- inutile!
+  per estFini => fini;
+
+thread
+-- periode du thread (periode, jitter, delay, offset)
+periodic(1000E6,0,0,0) (Action)
+
+end Dispenseurs

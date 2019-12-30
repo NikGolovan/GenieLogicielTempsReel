@@ -1,0 +1,100 @@
+
+class Controleur
+
+values
+
+  private Indicateur : nat = 2;
+
+instance variables
+  public menaceDetectee : bool:= false;
+  private fini   : bool := false;
+  private ListeActeur   : map nat to Controleur`typeActeur := { |-> };
+  
+  private distance : nat := 0;
+  private latitude : nat := 0;
+  private longitude : nat := 0;
+
+	-- le detecteur qui permet detecter s'il y a une menace
+	private detecteur : Detecteur := new Detecteur();
+types   
+--type des acteurs
+public typeActeur 	= <CAPTEUR_DISTANCE> | <CAPTEUR_LONGITUDE>  | <CAPTEUR_LATITUDE> | <NUL> ;
+
+operations
+
+public miseAjourValeurs: () ==> ()
+miseAjourValeurs() ==
+ ( 
+    distance :=  SystemeRTP`CapteurDistance.ReadDistance();
+    longitude :=  SystemeRTP`CapteurLongitude.ReadLongitude();
+    latitude :=  SystemeRTP`CapteurLatitude.ReadLatitude();
+ );
+
+--exemple d'algorithme d'asservissement mettant en jeux un <CAPTEUR_DISTANCE>, <CAPTEUR_LONGITUDE>, <DISPENSEURS> et un  <CAPTEUR_LONGITUDE>})
+private Algorithme: () ==> ()
+	Algorithme() ==
+	(dcl    dateActuelle: nat:= time;
+			    distance := Application`env.ReadDistance(); 
+			    latitude := Application`env.ReadLatitude(); 
+			    longitude := Application`env.ReadLongitude(); 
+
+	if (detecteur.menacePresente(distance))
+	        then (
+  		  SystemeRTP`CapteurDistance.SetDistance(distance);
+  		  SystemeRTP`CapteurLatitude.SetLatitude(latitude);
+  		  SystemeRTP`CapteurLongitude.SetLongitude(longitude);
+  		  
+  		  -- activer les dispenseurs
+  		  if (longitude < 60) then (SystemeRTP`Dispenseurs.ActiverDispenseur("<DISP00>");)
+				else if (longitude <= 120) then (SystemeRTP`Dispenseurs.ActiverDispenseur("<DISP60>");)
+				else if (longitude <= 180) then (SystemeRTP`Dispenseurs.ActiverDispenseur("<DISP120>");)
+				else if (longitude <= 240) then (SystemeRTP`Dispenseurs.ActiverDispenseur("<DISP180>");)
+				else if (longitude <= 300) then (SystemeRTP`Dispenseurs.ActiverDispenseur("<DISP240>");)
+				else SystemeRTP`Dispenseurs.ActiverDispenseur("<DISP360>");	
+  		  
+        menaceDetectee := true;
+
+        if (menaceDetectee) then (
+         IO`print("\n**********************************************************************************************************");
+				 IO`print("\n\tPar action des capteurs, le dispenseur ");
+				 IO`print(SystemeRTP`Dispenseurs.ReadDispenseur()); 
+				 IO`print(" a ete active contre la menace.");
+				 IO`print("\tL'instant: ");
+				 IO`print(dateActuelle); 
+				 IO`print("\n**********************************************************************************************************"); 
+				 menaceDetectee := false;
+        ))
+	 ); 
+
+--pour configurer le syst�me : les capteurs et r�galateurs en pr�sence
+public AjouterActeur: nat * typeActeur ==> ()
+	AjouterActeur(id, type) ==
+		ListeActeur := ListeActeur ++ {id |-> type}
+		
+pre id not in set dom ListeActeur
+post card(dom ListeActeur) = card(dom ListeActeur~) + 1;
+
+private Action: () ==> ()
+Action() ==
+ (miseAjourValeurs();
+  Algorithme();
+ );
+
+public estFini: () ==> ()
+estFini() == 
+  skip;
+
+public Finir: () ==> ()
+Finir() == 
+  fini := true;
+
+sync
+  per estFini => fini;
+
+
+thread
+
+-- periode du thread (periode, jitter, delay, offset)
+periodic(1000E6,0,0,0) (Action)
+
+end Controleur

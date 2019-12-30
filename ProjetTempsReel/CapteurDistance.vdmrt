@@ -1,0 +1,40 @@
+
+class CapteurDistance is subclass of Capteur
+
+instance variables
+
+  fini : bool := false;
+  distance : nat := 0;
+operations
+
+public CapteurDistance: nat * Controleur`typeActeur * nat ==> CapteurDistance
+CapteurDistance (id, type, val) ==
+ (ID := id;
+  Type := type;
+  Valeur := val;
+ );
+
+public SetDistance: nat ==> ()
+SetDistance(d) ==
+ distance := d;
+
+public ReadDistance: () ==> nat
+ReadDistance() ==
+ return distance;
+
+public Action: () ==> ()
+Action () ==
+  Valeur := Application`env.ReadDistance() ;
+
+public estFini: () ==> ()
+estFini() ==
+  skip;
+
+sync
+  per estFini => fini;
+
+thread
+-- periode du thread (periode, jitter, delay, offset)
+periodic(1000E6,0,0,0) (Action)
+
+end CapteurDistance

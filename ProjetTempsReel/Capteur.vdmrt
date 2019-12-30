@@ -1,0 +1,28 @@
+
+class Capteur
+
+instance variables
+
+  protected ID    : nat;
+  protected Type  : Controleur`typeActeur;
+  protected Valeur : int;
+
+operations
+
+public GetID: () ==> nat
+GetID() ==
+  return ID;
+
+public GetType: () ==> Controleur`typeActeur
+GetType() ==
+  return Type;
+
+public ReadValeur: () ==> int
+ReadValeur() ==
+  return Valeur;
+
+public Action: () ==> ()
+Action() ==
+  is subclass responsibility
+
+end Capteur

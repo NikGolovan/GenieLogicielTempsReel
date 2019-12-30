@@ -1,0 +1,19 @@
+
+class Actionneur
+instance variables
+  protected ID   : nat;
+  protected Type : Controleur`typeActeur;
+  
+operations
+public GetID: () ==> nat
+GetID() ==
+  return ID;
+
+public GetType: () ==> Controleur`typeActeur
+GetType() ==
+  return Type;
+
+public Action: () ==> ()
+Action() ==
+  is subclass responsibility
+end Actionneur

@@ -1,0 +1,121 @@
+-----------------------------------------------
+
+class Environnement
+
+instance variables
+  private io       : IO := new IO();
+  private stimuli  : seq of stimulus := [];
+ -- private outlines : seq of outline := [];
+  private dur�eSimulation  : nat;
+  private fini : bool := false;
+  --temperature et pression dans environnement(r�servoir)
+  private envDistance : int := 20;
+  private envLongitude : int := 80;
+  private envLatitude : int := 50;
+  private envPriority : int := 1;
+  
+types
+-- stimulus: triplet(date,temperature, pression)
+public stimulus	= nat * nat * nat * nat * nat;
+
+operations
+ 
+public Environnement: seq of char ==> Environnement
+Environnement(seqStimuli) ==
+
+ (let mk_ (-,mk_(t,input)) = io.freadval[nat * seq of stimulus](seqStimuli) 
+  in
+   (stimuli := input;
+    dur�eSimulation := t;
+    envDistance := 20;
+    envLongitude := 80;
+    envLatitude := 50;
+   );
+ )
+pre seqStimuli <> []
+post stimuli <> [] and dur�eSimulation > 0;
+
+private produireStimuli: () ==> ()
+produireStimuli() ==
+ (if len stimuli > 0
+  then (dcl dateActuelle : nat := time;
+	let mk_ (distance, longitude, latitude, type, date) = hd stimuli 
+        in
+         (if date <= dateActuelle
+          then (SetDistance(distance);
+                SetLatitude(latitude);  
+                SetLongitude(longitude);
+                SetPriority(type);                
+           IO`print("\n************************************************************************************************************************");
+           IO`print("\n -!-!-!-!-!-!-!-!-!-!-!- Menace detectee par les capteurs -!-!-!-!-!-!-!-!-!-!-!-");
+           IO`print("\n************************************************************************************************************************");
+           IO`print("\n\tDistance (d), Longitude (lo) et Latitude (la) sont les suivants :  ");  IO`print("\t"); IO`print("date = "); IO`print(date); IO`print("\n");                       		
+           IO`print("\t\tDistance = "); IO`print(distance); IO`print("\tLongitude = ");  IO`print(longitude); IO`print("\tLatitude = ");  IO`print(latitude);  IO`print("\tType missile = ");  IO`print(new Dispenseurs(type).GetTypeMissile());                             
+           IO`print("\n************************************************************************************************************************");  
+           stimuli := tl stimuli;
+                return
+               );
+         );
+       );
+  if (time >= dur�eSimulation)
+  then (
+        fini := true;
+        return;
+       );
+ );	
+ 
+ --affectation de valeur pour la distance:capteur
+public SetDistance: int ==> ()
+SetDistance(d) ==
+  envDistance := d;
+ 
+--affectation de valeur de priorite
+public SetPriority: int ==> ()
+SetPriority(p) ==
+  envPriority := p;
+ 
+--affectation de valeur pour la longitude:capteur
+public SetLongitude: int ==> ()
+SetLongitude(l) ==
+  envLongitude := l;
+ 
+--affectation de valeur pour la latitude:capteur
+public SetLatitude: int ==> ()
+SetLatitude(l) ==
+  envLatitude := l;
+ 
+--lecture de la distance:capteur
+public ReadDistance: () ==> int
+ReadDistance() ==
+  return envDistance;
+
+--lecture de la longitude:capteur
+public ReadLongitude: () ==> int
+ReadLongitude() ==
+  return envLongitude;
+
+--lecture de la latitude:capteur
+public ReadLatitude: () ==> int
+ReadLatitude() ==
+  return envLatitude;
+  
+public ReadPriority: () ==> int
+ReadPriority() ==
+  return envPriority;  
+  
+public estFini: () ==> ()
+estFini() ==
+  skip;
+
+sync
+	mutex(SetDistance);
+	mutex(SetLongitude);
+	mutex(SetLatitude);
+	mutex(SetPriority);
+  mutex(ReadDistance, ReadLatitude, ReadLongitude, ReadPriority);
+  per estFini => fini;
+
+thread
+-- periode du thread (period, jitter, delay, offset)
+periodic(1000E6,0,0,0) (produireStimuli)
+end Environnement

@@ -1,0 +1,41 @@
+-----------------------------------------------
+class CapteurLongitude is subclass of Capteur
+
+instance variables
+  fini : bool := false;
+  longitude : nat := 0;
+operations
+
+public CapteurLongitude: nat * Controleur`typeActeur * int ==> CapteurLongitude
+CapteurLongitude (id, type, val) ==
+ (ID := id;
+  Type := type;
+  Valeur:= val;
+ );
+ 
+public SetLongitude: nat ==> ()
+SetLongitude(l) ==
+ longitude := l;
+
+public ReadLongitude: () ==> nat
+ReadLongitude() ==
+ return longitude;
+
+public Action: () ==> ()
+Action () ==
+(
+  Valeur := Application`env.ReadLongitude();
+);
+
+public estFini: () ==> ()
+estFini() ==
+  skip;
+
+sync
+  per estFini => fini;
+
+thread
+-- period of thread (period, jitter, delay, offset)
+periodic(1000E6,0,0,0) (Action)
+
+end CapteurLongitude

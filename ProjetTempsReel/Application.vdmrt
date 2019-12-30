@@ -1,0 +1,31 @@
+
+class Application
+
+instance variables
+public static env : [Environnement] := nil;
+--env: := new Environnement("flotStimuli.txt");
+
+operations 
+public Application: () ==> Application
+Application() ==
+ (env := new Environnement("flotSimuli.txt");
+  SystemeRTP`Pilote.AjouterActeur(SystemeRTP`CapteurDistance.GetID(),SystemeRTP`CapteurDistance.GetType());
+  SystemeRTP`Pilote.AjouterActeur(SystemeRTP`CapteurLongitude.GetID(),SystemeRTP`CapteurLongitude.GetType());
+  SystemeRTP`Pilote.AjouterActeur(SystemeRTP`CapteurLatitude.GetID(),SystemeRTP`CapteurLatitude.GetType());
+
+  start(SystemeRTP`CapteurDistance);
+  start(SystemeRTP`CapteurLongitude);
+  start(SystemeRTP`CapteurLatitude);
+  start(SystemeRTP`Pilote);
+ );
+
+public Simuler: () ==> ()
+Simuler() ==
+ (-- lancer (start thread)  environment 
+  start(env);
+  --attendre que l'environnement ait fini de produire des stimuli 
+  env.estFini();
+  -- d�sactiver le pilote (controleur)
+ --SystemeRTP`Pilote.Finir();
+ );
+end Application

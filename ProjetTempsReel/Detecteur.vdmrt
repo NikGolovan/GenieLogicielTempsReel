@@ -1,0 +1,10 @@
+class Detecteur
+-- detecte la presence d'une menace
+operations
+-- retourner le resultat est dire s'il y a une menace
+public menacePresente: nat ==> bool
+	menacePresente(distanceMenace) ==
+		if (distanceMenace <= 25) then (return true)
+		else return false;	
+
+end Detecteur

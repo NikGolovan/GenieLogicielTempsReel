@@ -1,0 +1,44 @@
+
+system SystemeRTP
+
+instance variables
+
+  ---1 cpu controleur 
+              cpu1 : CPU := new CPU(<FCFS>, 1E6);
+  ---3 cpu capteurs: un par chaque capteur
+              cpu2 : CPU := new CPU(<FCFS>, 1E6);
+              cpu3 : CPU := new CPU(<FCFS>, 1E6);
+              cpu4 : CPU := new CPU(<FCFS>, 1E6);
+  ---1 cpu dispenseurs
+              cpu5 : CPU := new CPU(<FCFS>, 1E6);
+
+  -- bus connexion controleur avec les capteurs et les dispenseurs
+  bus1 : BUS := new BUS(<FCFS>, 1E3, {cpu1, cpu2, cpu3, cpu4, cpu5 });
+
+  public static Pilote : Controleur:= new Controleur ();
+  public static CapteurDistance: CapteurDistance := new CapteurDistance(1, <CAPTEUR_DISTANCE>, 20);
+  public static CapteurLatitude : CapteurLatitude := new CapteurLatitude(2, <CAPTEUR_LATITUDE>, 75);
+  public static CapteurLongitude : CapteurLongitude := new CapteurLongitude(3, <CAPTEUR_LONGITUDE>, 75);
+  public static Dispenseurs : Dispenseurs := new Dispenseurs(3);
+
+--
+-- Operations definition section
+operations
+
+public SystemeRTP: () ==> SystemeRTP
+SystemeRTP() ==
+ -- deploiement des threads sur la plate forme cpu comme suit:
+          (
+-- on deploie le Pilote sur cpu1
+          cpu1.deploy(Pilote );
+-- on deploie CapteurDistance sur cpu2        
+          cpu2.deploy(CapteurDistance);
+-- on deploie CapteurLatitude sur cpu3            
+          cpu3.deploy(CapteurLatitude);
+-- on deploie CapteurLongitude sur cpu4       
+          cpu4.deploy(CapteurLongitude);
+-- on deploie Dispenseurs sur cpu5          
+          cpu5.deploy(Dispenseurs); 
+           );
+
+end SystemeRTP
